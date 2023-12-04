@@ -1,0 +1,63 @@
+[GLOBAL]
+pants_version = "2.18.0"
+backend_packages = [
+  "pants.backend.docker",
+  "pants.backend.python",
+  "pants.backend.python.mixed_interpreter_constraints",
+  "pants.backend.python.lint.black",
+  "pants.backend.python.lint.pylint",
+  "pants.backend.python.typecheck.mypy",
+]
+concurrent = true
+unmatched_build_file_globs = "error"
+
+[anonymous-telemetry]
+enabled = false
+
+[test]
+use_coverage = true
+report = true
+output = "all"
+extra_env_vars = [
+  "JAVA_HOME"
+]
+
+[pytest]
+install_from_resolve = "pytest"
+xdist_enabled = true
+
+[coverage-py]
+install_from_resolve = "pytest"
+report = ["console", "xml"]
+interpreter_constraints = [
+  "CPython==3.7.*"
+]
+
+[source]
+root_patterns = [
+  "/package-one/*",
+]
+
+[python]
+enable_resolves = true
+default_resolve = "default"
+interpreter_constraints = [
+  "CPython==3.7.*"
+]
+
+[python.resolves]
+spark = "3rdparty/python/spark.lock"
+default = "3rdparty/python/default.lock"
+pytest = "3rdparty/python/pytest.lock"
+
+[python-bootstrap]
+search_path = [
+  "<PYENV>",
+  "/usr/local/bin",
+]
+
+[python-infer]
+use_rust_parser = true
+
+[generate-lockfiles]
+diff = true
