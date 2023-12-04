@@ -17,9 +17,16 @@ def basic_spark_function(df: DataFrame) -> DataFrame:
         [StructField("lat", DoubleType(), True), StructField("lng", DoubleType(), True)]
     )
 )
-def udf_spark_function(lat: Column, lng: Column) -> Column:
+def udf_function(lat: Column, lng: Column) -> Column:
     try:
         lat_wgs, lng_wgs = gcj2wgs(lat, lng)
     except:
         lat_wgs, lng_wgs = None
     return {"lat": lat_wgs, "lng": lng_wgs}
+
+
+def udf_spark_function(df: DataFrame) -> DataFrame:
+    return df.select(
+        "*",
+        fn.expr("A_UDF_FCN()").alias("new_column")
+    )
