@@ -1,12 +1,15 @@
 [GLOBAL]
-pants_version = "2.18.0"
+pants_version = "2.18.1"
 backend_packages = [
+  "pants.backend.build_files.fmt.buildifier",
   "pants.backend.docker",
   "pants.backend.python",
   "pants.backend.python.mixed_interpreter_constraints",
   "pants.backend.python.lint.black",
+  "pants.backend.python.lint.isort",
   "pants.backend.python.lint.pylint",
   "pants.backend.python.typecheck.mypy",
+  "pants.backend.experimental.python",
 ]
 concurrent = true
 unmatched_build_file_globs = "error"
@@ -32,6 +35,9 @@ report = ["console", "xml"]
 interpreter_constraints = [
   "CPython==3.7.*"
 ]
+
+[repl]
+shell = "ipython"
 
 [source]
 root_patterns = [
