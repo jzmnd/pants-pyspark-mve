@@ -8,7 +8,7 @@ from pants.backend.python.util_rules.package_dists import SetupKwargs, SetupKwar
 from pants.base.build_root import BuildRoot
 from pants.core.util_rules.system_binaries import BinaryPathRequest, BinaryPaths
 from pants.engine.fs import DigestContents, GlobMatchErrorBehavior, PathGlobs
-from pants.engine.process import Process, ProcessResult
+from pants.engine.process import Process, ProcessCacheScope, ProcessResult
 from pants.engine.rules import Get, collect_rules, rule
 from pants.engine.target import Target
 from pants.engine.unions import UnionRule
@@ -69,6 +69,7 @@ async def setup_kwargs_plugin(
                 "--long",
             ],
             description="version from `git describe`",
+            cache_scope=ProcessCacheScope.PER_SESSION,
         ),
     )
     git_describe_match = re.search(
