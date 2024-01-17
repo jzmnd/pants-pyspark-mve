@@ -1,4 +1,4 @@
-"""Plugin to create custom kwargs for python_artifact() for use in setup.py"""
+"""Plugin to create custom kwargs for `python_artifact()` for use in setup.py"""
 from __future__ import annotations
 
 import os
@@ -15,7 +15,6 @@ from pants.engine.unions import UnionRule
 
 
 class CustomSetupKwargsRequest(SetupKwargsRequest):
-
     @classmethod
     def is_applicable(cls, _: Target) -> bool:
         """Always use our custom `setup()` kwargs generator for `python_distribution` targets."""
@@ -62,14 +61,18 @@ async def setup_kwargs_plugin(
         Process(
             argv=[
                 git_bin.path,
-                "-C", build_root.path,
-                "describe", "--tags", "--always", "--long",
+                "-C",
+                build_root.path,
+                "describe",
+                "--tags",
+                "--always",
+                "--long",
             ],
             description="version from `git describe`",
-        )
+        ),
     )
     git_describe_match = re.search(
-        r'^(.+)-(\d+)-g([0-9a-f]+)$', git_describe.stdout.decode().strip()
+        r"^(.+)-(\d+)-g([0-9a-f]+)$", git_describe.stdout.decode().strip()
     )
     tag = git_describe_match.group(1)
     distance = git_describe_match.group(2)
