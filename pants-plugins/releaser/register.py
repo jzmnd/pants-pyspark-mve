@@ -14,6 +14,13 @@ from pants.engine.target import Target
 from pants.engine.unions import UnionRule
 
 
+DEFAULT_KWARGS = {
+    "author": "Jez Smith",
+    "readme": "README.md",
+    "url": "https://github.com/jzmnd/pants-pyspark-mve"
+}
+
+
 class CustomSetupKwargsRequest(SetupKwargsRequest):
     @classmethod
     def is_applicable(cls, _: Target) -> bool:
@@ -21,10 +28,35 @@ class CustomSetupKwargsRequest(SetupKwargsRequest):
         return True
 
 
+class GitTagVersion(str):
+    pass
+
+
 @rule
-async def setup_kwargs_plugin(
-    request: CustomSetupKwargsRequest, build_root: BuildRoot
-) -> SetupKwargs:
+async def get_git_repo_version(build_root: BuildRoot) -> GitTagVersion:
+    git_paths = await Get(
+        BinaryPaths,
+        BinaryPathRequest(
+            binary_name="git",
+            search_path=["/usr/bin", "/bin"],
+        ),
+    )
+    git_bin = git_paths.first_path
+    if git_bin is None:
+        raise OSError("Could not find 'git'.")
+    git_describe = await Get(
+        ProcessResult,
+        Process(
+            argv=[git_bin.path, "-C", build_root.path, "describe", "--tags", "--always", "--long"],
+            description="version from `git describe`",
+            cache_scope=ProcessCacheScope.PER_SESSION,
+        ),
+    )
+    return GitTagVersion(git_describe.stdout.decode().strip())
+
+
+@rule
+async def setup_kwargs_plugin(request: CustomSetupKwargsRequest) -> SetupKwargs:
     kwargs = request.explicit_kwargs.copy()
 
     if "name" not in kwargs:
@@ -48,41 +80,14 @@ async def setup_kwargs_plugin(
     )
     kwargs["long_description"] = digest_contents[0].content.decode()
 
-    git_paths = await Get(
-        BinaryPaths,
-        BinaryPathRequest(
-            binary_name="git",
-            search_path=["/usr/bin", "/bin"],
-        ),
-    )
-    git_bin = git_paths.first_path
-    git_describe = await Get(
-        ProcessResult,
-        Process(
-            argv=[
-                git_bin.path,
-                "-C",
-                build_root.path,
-                "describe",
-                "--tags",
-                "--always",
-                "--long",
-            ],
-            description="version from `git describe`",
-            cache_scope=ProcessCacheScope.PER_SESSION,
-        ),
-    )
-    git_describe_match = re.search(
-        r"^(.+)-(\d+)-g([0-9a-f]+)$", git_describe.stdout.decode().strip()
-    )
-    tag = git_describe_match.group(1)
-    distance = git_describe_match.group(2)
-    shorthash = git_describe_match.group(3)
+    git_repo_version = await Get(GitTagVersion)
+    git_repo_version_match = re.search(r"^(.+)-(\d+)-g([0-9a-f]+)$", git_repo_version)
+    tag = git_repo_version_match.group(1)
+    distance = git_repo_version_match.group(2)
+    shorthash = git_repo_version_match.group(3)
     kwargs["version"] = f"{tag}.post{distance}+{shorthash}"
 
-    kwargs["author"] = "Jez Smith"
-    kwargs["readme"] = "README.md"
-    kwargs["url"] = "https://github.com/jzmnd/pants-pyspark-mve"
+    kwargs.update(DEFAULT_KWARGS)
 
     return SetupKwargs(kwargs, address=request.target.address)
 
