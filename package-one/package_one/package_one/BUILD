@@ -1,3 +1,3 @@
 python_sources(
-    resolve="spark",
+    resolve = "spark",
 )

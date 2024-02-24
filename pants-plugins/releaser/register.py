@@ -17,7 +17,7 @@ from pants.engine.unions import UnionRule
 DEFAULT_KWARGS = {
     "author": "Jez Smith",
     "readme": "README.md",
-    "url": "https://github.com/jzmnd/pants-pyspark-mve"
+    "url": "https://github.com/jzmnd/pants-pyspark-mve",
 }
 
 

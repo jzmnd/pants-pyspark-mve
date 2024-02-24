@@ -1,8 +1,8 @@
 python_sources(
-    resolve="spark",
+    resolve = "spark",
 )
 
 python_tests(
-    name="tests0",
-    resolve="spark",
+    name = "tests0",
+    resolve = "spark",
 )
