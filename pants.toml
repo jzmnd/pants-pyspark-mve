@@ -1,5 +1,5 @@
 [GLOBAL]
-pants_version = "2.18.1"
+pants_version = "2.19.0"
 backend_packages = [
   "releaser",
   "pants.backend.build_files.fmt.buildifier",
@@ -68,6 +68,3 @@ search_path = [
 
 [python-infer]
 use_rust_parser = true
-
-[generate-lockfiles]
-diff = true
