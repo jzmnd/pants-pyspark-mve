@@ -14,4 +14,5 @@ export JAVA_HOME=/opt/homebrew/Cellar/openjdk@11/11.0.21/libexec/openjdk.jdk/Con
 pants lint ::
 pants check ::
 pants test ::
+pants package ::
 ```

@@ -1,17 +1,15 @@
-"""Plugin to create custom kwargs for `python_artifact()` for use in setup.py"""
+"""Rule to create custom kwargs for `python_artifact()` for use in setup.py"""
 from __future__ import annotations
 
 import os
-import re
 
 from pants.backend.python.util_rules.package_dists import SetupKwargs, SetupKwargsRequest
-from pants.base.build_root import BuildRoot
-from pants.core.util_rules.system_binaries import BinaryPathRequest, BinaryPaths
 from pants.engine.fs import DigestContents, GlobMatchErrorBehavior, PathGlobs
-from pants.engine.process import Process, ProcessCacheScope, ProcessResult
 from pants.engine.rules import Get, collect_rules, rule
 from pants.engine.target import Target
 from pants.engine.unions import UnionRule
+
+from user.python.releaser.gitversion import GitVersion
 
 
 DEFAULT_KWARGS = {
@@ -26,33 +24,6 @@ class CustomSetupKwargsRequest(SetupKwargsRequest):
     def is_applicable(cls, _: Target) -> bool:
         """Always use our custom `setup()` kwargs generator for `python_distribution` targets."""
         return True
-
-
-class GitTagVersion(str):
-    pass
-
-
-@rule
-async def get_git_repo_version(build_root: BuildRoot) -> GitTagVersion:
-    git_paths = await Get(
-        BinaryPaths,
-        BinaryPathRequest(
-            binary_name="git",
-            search_path=["/usr/bin", "/bin"],
-        ),
-    )
-    git_bin = git_paths.first_path
-    if git_bin is None:
-        raise OSError("Could not find 'git'.")
-    git_describe = await Get(
-        ProcessResult,
-        Process(
-            argv=[git_bin.path, "-C", build_root.path, "describe", "--tags", "--always", "--long"],
-            description="version from `git describe`",
-            cache_scope=ProcessCacheScope.PER_SESSION,
-        ),
-    )
-    return GitTagVersion(git_describe.stdout.decode().strip())
 
 
 @rule
@@ -80,12 +51,8 @@ async def setup_kwargs_plugin(request: CustomSetupKwargsRequest) -> SetupKwargs:
     )
     kwargs["long_description"] = digest_contents[0].content.decode()
 
-    git_repo_version = await Get(GitTagVersion)
-    git_repo_version_match = re.search(r"^(.+)-(\d+)-g([0-9a-f]+)$", git_repo_version)
-    tag = git_repo_version_match.group(1)
-    distance = git_repo_version_match.group(2)
-    shorthash = git_repo_version_match.group(3)
-    kwargs["version"] = f"{tag}.post{distance}+{shorthash}"
+    git_version = await Get(GitVersion)
+    kwargs["version"] = f"{git_version.tag}.post{git_version.distance}+{git_version.shorthash}"
 
     kwargs.update(DEFAULT_KWARGS)
 

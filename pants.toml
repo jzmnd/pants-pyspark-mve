@@ -1,7 +1,6 @@
 [GLOBAL]
 pants_version = "2.21.0"
 backend_packages = [
-  "releaser",
   "pants.backend.build_files.fmt.buildifier",
   "pants.backend.docker",
   "pants.backend.python",
@@ -11,6 +10,7 @@ backend_packages = [
   "pants.backend.python.lint.pylint",
   "pants.backend.python.typecheck.mypy",
   "pants.backend.experimental.python",
+  "user.python.releaser",
 ]
 concurrent = true
 unmatched_build_file_globs = "error"
