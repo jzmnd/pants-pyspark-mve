@@ -2,10 +2,11 @@
 import logging
 from typing import Any, Dict
 
+import pandas as pd
 from eviltransform import gcj2wgs
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as fn
-from pyspark.sql.types import DoubleType, StructField, StructType
+from pyspark.sql.types import DoubleType, LongType, StructField, StructType
 
 
 def basic_spark_function(data: DataFrame) -> DataFrame:
@@ -21,7 +22,7 @@ def basic_spark_function(data: DataFrame) -> DataFrame:
         [StructField("lat", DoubleType(), True), StructField("lng", DoubleType(), True)]
     )
 )
-def udf_function(lat: float, lng: float) -> Dict[str, Any]:
+def basic_udf(lat: float, lng: float) -> Dict[str, Any]:
     """Simple UDF for converting between coordinate systems."""
     try:
         lat_wgs, lng_wgs = gcj2wgs(lat, lng)
@@ -31,6 +32,15 @@ def udf_function(lat: float, lng: float) -> Dict[str, Any]:
     return {"lat": lat_wgs, "lng": lng_wgs}
 
 
-def udf_spark_function(data: DataFrame) -> DataFrame:
-    """Simple Spark UDF"""
+def spark_sql_udf(data: DataFrame) -> DataFrame:
+    """Simple Spark SQL UDF."""
     return data.select("*", fn.expr("A_UDF_FCN()").alias("new_column"))
+
+
+@fn.pandas_udf(
+    StructType([StructField("id", LongType(), False), StructField("value", DoubleType(), True)]),
+    fn.PandasUDFType.GROUPED_MAP,
+)
+def pandas_grouped_map_udf(data: pd.DataFrame) -> pd.DataFrame:
+    """Simple grouped map Pandas UDF to subtract mean from a group."""
+    return data.assign(value=data.value - data.value.mean())
