@@ -10,7 +10,7 @@ To run tests with PySpark, `JAVA_HOME` must be set before running any Pants comm
 
 MacOS example with openjdk 11 installed via [homebrew](https://brew.sh):
 ```bash
-export JAVA_HOME=/opt/homebrew/Cellar/openjdk@11/11.0.21/libexec/openjdk.jdk/Contents/Home/
+export JAVA_HOME=/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home/
 pants lint ::
 pants check ::
 pants test ::
