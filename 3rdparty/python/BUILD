@@ -6,6 +6,13 @@ python_requirements(
 
 python_requirements(
     name = "reqs-spark",
+    overrides = {
+        "pyspark": {
+            "dependencies": [
+                ":reqs-spark#pyarrow",
+            ],
+        },
+    },
     resolve = "spark",
     source = "requirements-spark.txt",
 )
