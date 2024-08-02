@@ -7,6 +7,7 @@ from package_one.module_a import (
 )
 from package_one.tests._pyspark import TestPySpark
 from pyspark.sql import functions as fn
+from pyspark.sql.types import DoubleType, LongType, StructField, StructType
 
 
 class TestModuleA(TestPySpark):
@@ -69,5 +70,8 @@ class TestModuleA(TestPySpark):
             [(1, -0.5), (1, 0.5), (2, -3.0), (2, -1.0), (2, 4.0)],
             ("id", "value"),
         )
-        output = test.groupby("id").apply(pandas_grouped_map_udf)
+        schema = StructType(
+            [StructField("id", LongType(), False), StructField("value", DoubleType(), True)]
+        )
+        output = test.groupby("id").applyInPandas(pandas_grouped_map_udf, schema)
         self.assertCountEqual(expected.collect(), output.collect())
