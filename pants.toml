@@ -1,5 +1,5 @@
 [GLOBAL]
-pants_version = "2.21.1"
+pants_version = "2.29.0"
 backend_packages = [
   "pants.backend.build_files.fmt.buildifier",
   "pants.backend.docker",
