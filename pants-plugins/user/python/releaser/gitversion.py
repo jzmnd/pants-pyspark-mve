@@ -39,6 +39,8 @@ async def get_git_repo_version(build_root: BuildRoot) -> GitVersion:
     )
     git_describe = git_describe.stdout.decode().strip()
     git_describe_match = re.search(r"^(.+)-(\d+)-g([0-9a-f]+)$", git_describe)
+    if not git_describe_match:
+        raise ValueError("Failed to get git version.")
 
     return GitVersion(
         tag=git_describe_match.group(1),

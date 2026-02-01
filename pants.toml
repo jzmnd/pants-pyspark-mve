@@ -35,7 +35,10 @@ xdist_enabled = true
 
 [coverage-py]
 install_from_resolve = "pytest"
-report = ["console", "xml"]
+report = [
+  "console",
+  "xml"
+]
 interpreter_constraints = [
   "CPython==3.9.*"
 ]
